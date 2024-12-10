@@ -29,13 +29,22 @@ def process_image(image_path, sensitivity, intersection_radius):
     # Converter para escala de cinza
     gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
 
-    # Pré-processamento: suavizar ruído para eliminar bordas não desejadas
+    # Suavizar ruído
     blurred = cv2.GaussianBlur(gray_image, (5, 5), 0)
 
-    # Detectar bordas usando Canny
+    # Detectar texto e números (opcional: usando morfologia ou OCR)
+    _, binary_image = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    morphed = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
+
+    # Criar uma máscara para ignorar regiões com texto
+    mask = cv2.bitwise_not(morphed)  # Inverter a máscara para filtrar texto
+    filtered_image = cv2.bitwise_and(blurred, blurred, mask=mask)
+
+    # Detectar bordas usando Canny na imagem filtrada
     lower_threshold = sensitivity
     upper_threshold = sensitivity * 3
-    edges = cv2.Canny(blurred, lower_threshold, upper_threshold)
+    edges = cv2.Canny(filtered_image, lower_threshold, upper_threshold)
 
     # Detectar linhas usando a Transformada de Hough
     min_line_length = 30  # Ignorar linhas muito curtas

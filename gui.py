@@ -7,7 +7,7 @@ e exibir os resultados da análise.
 """
 
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QTextEdit, QFileDialog, QSpinBox, QGroupBox
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QTextEdit, QFileDialog, QSpinBox, QGroupBox, QLineEdit
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
@@ -28,12 +28,24 @@ class FractureAnalyzerApp(QMainWindow):
         # Criar o painel esquerdo (seleção, status, botões)
         self.left_panel = QVBoxLayout()
 
+        # Caixa de texto para exibir o caminho da imagem selecionada
+        self.image_path_box = QLineEdit()
+        self.image_path_box.setPlaceholderText("Nenhuma imagem selecionada")
+        self.image_path_box.setReadOnly(True)  # Apenas para exibição
+        self.left_panel.addWidget(self.image_path_box)
+
         # Botão para selecionar imagem
         self.select_image_button = QPushButton("Selecionar Imagem")
         self.select_image_button.clicked.connect(self.load_image)
         self.left_panel.addWidget(self.select_image_button)
 
-        # Caixa de texto para status (altura aumentada)
+        # Botão para iniciar a análise
+        self.analyze_button = QPushButton("Analisar")
+        self.analyze_button.setEnabled(False)  # Inicialmente desativado
+        self.analyze_button.clicked.connect(self.analyze_image)
+        self.left_panel.addWidget(self.analyze_button)
+
+        # Caixa de texto para status (altura ajustada)
         self.status_box = QTextEdit()
         self.status_box.setReadOnly(True)
         self.status_box.setFixedSize(450, 300)  # Largura e altura ajustadas para maior equilíbrio
@@ -47,7 +59,7 @@ class FractureAnalyzerApp(QMainWindow):
         self.controls_layout.addWidget(self.sensitivity_label)
         self.sensitivity_spinbox = QSpinBox()
         self.sensitivity_spinbox.setRange(1, 100)
-        self.sensitivity_spinbox.setValue(50)
+        self.sensitivity_spinbox.setValue(100)
         self.controls_layout.addWidget(self.sensitivity_spinbox)
 
         self.radius_label = QLabel("Raio para interseções:")
@@ -91,25 +103,36 @@ class FractureAnalyzerApp(QMainWindow):
         self.status_box.append("")  # Adiciona uma linha em branco
 
     def load_image(self):
-        """Carrega a imagem, processa e exibe o resultado."""
+        """Carrega a imagem e habilita o botão Analisar."""
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Selecione uma imagem", "", "Imagens (*.png *.jpg *.bmp)", options=options
         )
         if file_path:
+            # Atualiza a caixa de texto com o caminho da imagem selecionada
+            self.image_path_box.setText(file_path)
             self.log_status(f"Imagem carregada: {file_path}")
 
-            # Processar a imagem
-            self.log_status("Processando a imagem...")
-            results, processed_image = process_image(file_path, self.sensitivity_spinbox.value(), self.radius_spinbox.value())
+            # Habilitar o botão Analisar
+            self.analyze_button.setEnabled(True)
 
-            # Atualizar o preview com a imagem processada
-            height, width, channel = processed_image.shape
-            bytes_per_line = channel * width
-            q_image = QImage(processed_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-            pixmap = QPixmap.fromImage(q_image)
-            self.image_label.setPixmap(pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio))
+    def analyze_image(self):
+        """Inicia a análise da imagem."""
+        file_path = self.image_path_box.text()
+        if not file_path:
+            self.log_status("Nenhuma imagem selecionada para análise.")
+            return
 
-            # Mostrar os resultados
-            self.log_status(f"Análise concluída: {results['fraturas']} fraturas, {results['X-nodes']} X-nodes, "
-                            f"{results['Y-nodes']} Y-nodes, {results['I-nodes']} I-nodes.")
+        self.log_status("Processando a imagem...")
+        results, processed_image = process_image(file_path, self.sensitivity_spinbox.value(), self.radius_spinbox.value())
+
+        # Atualizar o preview com a imagem processada
+        height, width, channel = processed_image.shape
+        bytes_per_line = channel * width
+        q_image = QImage(processed_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(q_image)
+        self.image_label.setPixmap(pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio))
+
+        # Mostrar os resultados
+        self.log_status(f"Análise concluída: {results['fraturas']} fraturas, {results['X-nodes']} X-nodes, "
+                        f"{results['Y-nodes']} Y-nodes, {results['I-nodes']} I-nodes.")

@@ -15,3 +15,11 @@ Este programa identifica fraturas em imagens usando técnicas de processamento d
 1. Clone o repositório:
    ```bash
    git clone https://github.com/brunomcmm/Topologia_de_fraturas.git
+
+Dependências
+
+Certifique-se de ter o Python 3.9+ instalado. As bibliotecas utilizadas são:
+	•	OpenCV
+	•	PyQt5
+	•	NumPy
+	•	SciPy
