@@ -37,7 +37,7 @@ git clone https://github.com/brunomcmm/Topologia_de_fraturas.git
 
 3. Instale as dependências necessárias:
 ```bash 
-pip install -r OpenCV PyQt5 PyQt5 SciPy
+pip install OpenCV PyQt5 PyQt5 SciPy
 ```
 
 4. Execute o programa principal:
