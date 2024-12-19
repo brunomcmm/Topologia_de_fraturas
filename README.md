@@ -25,5 +25,5 @@ Este programa identifica fraturas em imagens utilizando técnicas de processamen
 ## Como Usar
 
 1. Clone o repositório:
-```git clone https://github.com/brunomcmm/Topologia_de_fraturas.git```
+```bash git clone https://github.com/brunomcmm/Topologia_de_fraturas.git```
 
