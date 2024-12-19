@@ -43,7 +43,7 @@ pip install OpenCV PyQt5 PyQt5 SciPy
 4. Execute o programa principal:
 ```bash 
 python main.py
-````
+```
 
 ## Contribuição
 Contribuições são bem-vindas! Sinta-se à vontade para abrir um issue ou enviar um pull request com melhorias.
